@@ -1,17 +1,12 @@
 const express = require("express");
 const app = express();
 const fs = require('fs');
-const { engine } = require("express-handlebars");
 var clientSessions = require("client-sessions");
-var data = require("./data-service.js")
+var data = require("./final.js")
 var path = require("path");
 
 var HTTP_PORT = process.env.PORT || 8080
-app.engine(".hbs", engine({
-    extname: ".hbs",
-}));
 
-app.set("view engine", ".hbs");
 
 function expressoutput() {
     console.log(`Express http server listening on ${HTTP_PORT}`);
@@ -30,12 +25,50 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, "/finalViews/home.html"))
+});
+
+app.get('/register', function (req, res) {
+    res.sendFile(path.join(__dirname, "/finalViews/register.html"))
+});
+
+app.post('/register', function (req, res) {
+    console.log(req.body);
+    data.register(req.body).then(() => {
+        let resText = "<body>" + req.body.useremail + " registered successfully</body>"
+        resText += "<h2><a href='/'><u>Go Home</u></a></h2>";
+        res.send(resText)
+    })
+    .catch((err) => {
+        res.send(err);
+    })
+});
+
+
+app.get('/signin', function (req, res) {
+    res.sendFile(path.join(__dirname, "/finalViews/signin.html"))
+});
+
+app.post('/signin', function (req, res) {
+    data.signIn(req.body).then((user) => {
+        req.session.user = {
+            useremail: user.useremail, // complete it with authenticated user's email
+        }
+        let resText = "<body>" + req.body.useremail + " signed in successfully</body>"
+        resText += "<h2><a href='/'><u>Go Home</u></a></h2>";
+        res.send(resText)
+    })
+    .catch((err) => {
+        res.send(err);
+    })
+});
+
 app.use(function (req, res) {
     res.status(404).send("Page not found");
 })
 
-dataService.initialize().then(dataService.initialize)
-    .then(function () {
+data.startDB().then(function () {
         app.listen(HTTP_PORT, function () {
             console.log("app listening on: " + HTTP_PORT)
         });
