@@ -65,11 +65,11 @@ exports.register = function(user){
 
 exports.signIn = function(user){
     return new Promise((resolve, reject) => {
-        User.findOne({ email: user.email })
+        User.findOne({ email: user.useremail })
             .exec()
             .then((foundUser) => {
                 if (email = "") {
-                    reject("Unable to find user: " + user.email)
+                    reject("Unable to find user: " + user.useremail)
                 }
                 else {
                     bcrypt.compare(user.password, foundUser.password).then((res) => {
@@ -78,13 +78,13 @@ exports.signIn = function(user){
                             resolve(foundUser);
                         }
                         else {
-                            reject('Incorrect Password for user: '+ user.email);
+                            reject('Incorrect Password for user: '+ user.useremail);
                         }
                     })
                 }
             })
             .catch(() => {
-                reject("Unable to find user: " + user.userName);
+                reject("Unable to find user: " + user.useremail);
             })
     })
 }
