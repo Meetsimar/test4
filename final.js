@@ -40,7 +40,10 @@ exports.register = function(user){
         else {
             bcrypt.hash(user.password, 10).then((hash) => {
                 user.password = hash;
-                let newUser = new User(user);
+                let newUser = new User({
+                email: user.useremail,
+                password: user.password
+            });
                 newUser.save((err) => {
                     if (err) {
                         if (err.code == 11000) {
